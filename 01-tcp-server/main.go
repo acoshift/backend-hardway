@@ -2,10 +2,9 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"net"
-	"net/http"
-	"time"
 )
 
 func main() {
@@ -31,16 +30,7 @@ func main() {
 					return
 				}
 				log.Printf("receive: %s\n", s)
-				if len(s) == 0 {
-					p := "HTTP/1.1 200 OK\n"
-					p += "Date: " + time.Now().Format(http.TimeFormat) + "\n"
-					p += "Connection: close\n"
-					p += "Content-Type: text/html\n"
-					p += "\n"
-					p += "<h1>Hello from TCP Server</h1><p>:P</p>"
-					conn.Write([]byte(p))
-					conn.Close()
-				}
+				fmt.Fprintf(conn, "server: %s\n", s)
 			}
 		}()
 	}
