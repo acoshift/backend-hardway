@@ -3,6 +3,7 @@ package main
 import (
 	"image"
 	"image/jpeg"
+	"io"
 	"log"
 	"net/http"
 
@@ -20,7 +21,7 @@ func resizeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	img, imgType, err := image.Decode(r.Body)
+	img, imgType, err := image.Decode(io.LimitReader(r.Body, 2<<20)) // 2 MiB
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

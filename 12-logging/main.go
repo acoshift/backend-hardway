@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -16,12 +17,42 @@ func main() {
 	http.ListenAndServe("localhost:3333", h)
 }
 
+type logRecord struct {
+	Time         string `json:"time"`
+	RemoteIP     string `json:"remote_ip"`
+	Host         string `json:"host"`
+	Method       string `json:"method"`
+	URI          string `json:"uri"`
+	Status       int    `json:"status"`
+	Latency      int64  `json:"latency"`
+	LatencyHuman string `json:"latency_human"`
+	BytesIn      int64  `json:"bytes_in"`
+	BytesOut     int64  `json:"bytes_out"`
+}
+
 func logger(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		nw := &responseWriter{ResponseWriter: w}
 		start := time.Now()
+		record := logRecord{
+			Time:     start.UTC().Format(time.RFC3339Nano),
+			RemoteIP: r.RemoteAddr,
+			Host:     r.Host,
+			Method:   r.Method,
+			URI:      r.RequestURI,
+			BytesIn:  r.ContentLength,
+		}
+
+		nw := &responseWriter{ResponseWriter: w}
 		h.ServeHTTP(nw, r)
-		log.Printf("[%d] %s %s %v", nw.code, r.Method, r.RequestURI, time.Now().Sub(start))
+
+		diff := time.Now().Sub(start)
+		record.Latency = int64(diff)
+		record.LatencyHuman = diff.String()
+		record.Status = nw.code
+		record.BytesOut = nw.wroteLenght
+
+		logStr, _ := json.Marshal(&record)
+		fmt.Println(string(logStr))
 	})
 }
 
@@ -29,6 +60,7 @@ type responseWriter struct {
 	http.ResponseWriter
 	code        int
 	wroteHeader bool
+	wroteLenght int64
 }
 
 func (w *responseWriter) WriteHeader(code int) {
@@ -44,7 +76,9 @@ func (w *responseWriter) Write(p []byte) (int, error) {
 	if !w.wroteHeader {
 		w.WriteHeader(http.StatusOK)
 	}
-	return w.ResponseWriter.Write(p)
+	l, err := w.ResponseWriter.Write(p)
+	w.wroteLenght += int64(l)
+	return l, err
 }
 
 type router struct {
