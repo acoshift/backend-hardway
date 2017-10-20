@@ -13,6 +13,7 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	// Content-Type: application/x-www-form-urlencoded
 	buf := bytes.Buffer{}
 	io.Copy(&buf, r.Body)
 	log.Println(buf.String())
