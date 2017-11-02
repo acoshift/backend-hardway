@@ -3,9 +3,7 @@ package main
 import "net/http"
 
 func main() {
-	http.HandleFunc("/", index)
-	http.HandleFunc("/about", about)
-	http.ListenAndServe(":3333", nil)
+	// use default mux to create http server
 }
 
 func index(w http.ResponseWriter, r *http.Request) {

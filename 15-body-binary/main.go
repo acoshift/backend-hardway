@@ -1,9 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"io"
-	"log"
 	"net/http"
 )
 
@@ -12,8 +9,6 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	buf := bytes.Buffer{}
-	io.Copy(&buf, r.Body)
-	log.Println(buf.String())
+	// print request body to console
 	w.Write([]byte("ok\n"))
 }

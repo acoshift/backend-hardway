@@ -5,18 +5,11 @@ import (
 )
 
 func main() {
-	http.ListenAndServe("localhost:3333", http.HandlerFunc(router))
+	http.ListenAndServe(":3333", http.HandlerFunc(router))
 }
 
 func router(w http.ResponseWriter, r *http.Request) {
-	switch r.URL.Path {
-	case "/":
-		index(w, r)
-	case "/about":
-		about(w, r)
-	default:
-		notFound(w, r)
-	}
+	// implement router
 }
 
 func index(w http.ResponseWriter, r *http.Request) {

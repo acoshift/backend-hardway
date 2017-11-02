@@ -1,10 +1,8 @@
 package main
 
 import (
-	"compress/gzip"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 func main() {
@@ -42,83 +40,54 @@ func large(w http.ResponseWriter, r *http.Request) {
 
 func gzipMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-			h.ServeHTTP(w, r)
-			return
-		}
+		// check is browser support gzip
 
-		// if r.Header.Get("Sec-WebSocket-Key") != "" {
-		if len(r.Header.Get("Sec-WebSocket-Key")) > 0 {
-			h.ServeHTTP(w, r)
-			return
-		}
+		// check is request is web socket
 
-		wh := w.Header()
+		// check is response already encoded
 
-		// if wh.Get("Content-Encoding") != "" {
-		if len(wh.Get("Content-Encoding")) > 0 {
-			h.ServeHTTP(w, r)
-			return
-		}
+		// set header `Vary: Accept-Encoding` to response
 
-		wh.Set("Vary", "Accept-Encoding")
+		// wrap responseWriter with gzipResponseWriter
 
-		gw := &gzipResponseWriter{
-			ResponseWriter: w,
-		}
-		defer gw.Close()
+		// don't foget to close gzip writer when done
 
-		h.ServeHTTP(gw, r)
+		// call next handler
 	})
 }
 
 type gzipResponseWriter struct {
-	http.ResponseWriter
-	gzipWriter    *gzip.Writer
-	contentLength int
+	//
 }
 
 func (w *gzipResponseWriter) init() {
-	h := w.Header()
+	// check is response already encoded
 
-	if len(h.Get("Content-Encoding")) > 0 {
-		return
-	}
+	// if content length not init, retrive from response's header `Content-Length`
 
-	if w.contentLength == 0 {
-		w.contentLength, _ = strconv.Atoi(h.Get("Content-Length"))
-	}
-	if w.contentLength > 0 && w.contentLength <= 860 {
-		return
-	}
+	// skip if content length less than 860 bytes
 
-	w.gzipWriter = gzip.NewWriter(w.ResponseWriter)
-	h.Del("Content-Length")
-	h.Set("Content-Encoding", "gzip")
+	// create new gzip writer
+
+	// remove response header `Content-Length`
+
+	// set response header `Content-Encoding: gzip`
 }
 
 func (w *gzipResponseWriter) Write(p []byte) (int, error) {
-	if w.gzipWriter == nil {
-		w.init()
-	}
+	// init writer if not inited
 
-	if w.gzipWriter != nil {
-		return w.gzipWriter.Write(p)
-	}
+	// if writer inited write to gzip writer
 
-	return w.ResponseWriter.Write(p)
+	// if not bypass gzip writer
+	return 0, nil
 }
 
 func (w *gzipResponseWriter) Close() {
-	if w.gzipWriter == nil {
-		return
-	}
-	w.gzipWriter.Close()
+	// close gzip writer
 }
 
 func (w *gzipResponseWriter) WriteHeader(code int) {
-	if w.gzipWriter == nil {
-		w.init()
-	}
-	w.ResponseWriter.WriteHeader(code)
+	// init gzip writer if not inited
+	// write header
 }

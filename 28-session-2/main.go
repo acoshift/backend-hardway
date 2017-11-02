@@ -30,7 +30,7 @@ func storeSession(sessionID string, sess *session) {
 }
 
 func removeSession(sessionID string) {
-	delete(sessionStore, sessionID)
+	//
 }
 
 func getSessionFromRequest(w http.ResponseWriter, r *http.Request) *session {
@@ -57,26 +57,19 @@ func getSessionFromRequest(w http.ResponseWriter, r *http.Request) *session {
 
 func rotateSession(w http.ResponseWriter, sess *session) *session {
 	// copy old session data to new session
-	newSess := *sess
 
 	// generate new session id
-	newSess.ID = generateSessionID()
 
 	// save new session to storage
-	storeSession(newSess.ID, &newSess)
 
-	w.Header().Del("Set-Cookie")
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session",
-		Value:    newSess.ID,
-		Path:     "/",
-		HttpOnly: true,
-	})
+	// remove old Set-Cookie header
+
+	// add session id to cookie
 
 	// remove old session from storage
-	removeSession(sess.ID)
 
-	return &newSess
+	// return new session
+	return nil
 }
 
 func generateSessionID() string {
@@ -111,7 +104,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 func signIn(w http.ResponseWriter, r *http.Request) {
 	sess := getSessionFromRequest(w, r)
 
-	sess = rotateSession(w, sess)
+	// rotate session id
+
 	sess.UserID = 1
 
 	http.Redirect(w, r, "/", http.StatusFound)

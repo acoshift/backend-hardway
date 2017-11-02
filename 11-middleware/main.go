@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 )
 
@@ -10,16 +9,15 @@ func main() {
 	r.Get("/", http.HandlerFunc(index))
 	r.Get("/about", http.HandlerFunc(about))
 
-	h := requestLogger(&r)
+	var h http.Handler
 
-	http.ListenAndServe("localhost:3333", h)
+	// wrap router with middleware
+
+	http.ListenAndServe(":3333", h)
 }
 
 func requestLogger(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("[%s] %s", r.Method, r.RequestURI)
-		h.ServeHTTP(w, r)
-	})
+	// implement
 }
 
 type router struct {

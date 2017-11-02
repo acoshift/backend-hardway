@@ -5,9 +5,9 @@ import (
 )
 
 func main() {
-	http.ListenAndServe("localhost:3333", http.HandlerFunc(handler))
+	// use http.ListenAndServe to start http server
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, World."))
+	// write data to responseWriter
 }

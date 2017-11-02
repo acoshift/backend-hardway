@@ -3,10 +3,11 @@ package main
 import "net/http"
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", index)
-	mux.HandleFunc("/about", about)
-	http.ListenAndServe(":3333", mux)
+	// create *http.ServeMux with http.NewServeMux()
+
+	// add handlers to mux
+
+	// create http server
 }
 
 func index(w http.ResponseWriter, r *http.Request) {

@@ -1,11 +1,7 @@
 package main
 
 import (
-	"bytes"
-	"io"
-	"log"
 	"net/http"
-	"net/url"
 )
 
 func main() {
@@ -14,14 +10,12 @@ func main() {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	// Content-Type: application/x-www-form-urlencoded
-	buf := bytes.Buffer{}
-	io.Copy(&buf, r.Body)
-	log.Println(buf.String())
-	body, err := url.ParseQuery(buf.String())
-	if err != nil {
-		log.Println("parse error:", err)
-		return
-	}
-	log.Println(body)
+
+	// print request body to console
+
+	// use url.ParseQuery to parse x-www-form-urlencoded
+
+	// print result to console
+
 	w.Write([]byte("ok\n"))
 }

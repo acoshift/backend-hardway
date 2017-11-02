@@ -1,37 +1,15 @@
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"log"
-	"net"
-)
-
 func main() {
-	lis, err := net.Listen("tcp", "localhost:3333")
-	if err != nil {
-		log.Fatal("tcp listen error:", err)
-	}
-	defer lis.Close()
+	// create tcp listener at :3333
+	// don't forget to close tcp listener when done
 
 	for {
-		conn, err := lis.Accept()
-		if err != nil {
-			log.Fatal("tcp accept error:", err)
-		}
+		// accept connection from listener
+		// don't forget to close connection when done
 
-		go func() {
-			defer conn.Close()
-			reader := bufio.NewReader(conn)
-			for {
-				s, _, err := reader.ReadLine()
-				if err != nil {
-					log.Printf("connection: %v\n", err)
-					return
-				}
-				log.Printf("receive: %s\n", s)
-				fmt.Fprintf(conn, "server: %s\n", s)
-			}
-		}()
+		// read data from connection
+
+		// print data out to console
 	}
 }

@@ -5,11 +5,9 @@ import (
 )
 
 func main() {
-	r := router{}
-	r.Get("/", http.HandlerFunc(index))
-	r.Get("/about", http.HandlerFunc(about))
+	// create router
 
-	http.ListenAndServe("localhost:3333", &r)
+	// use http.ListenAndServe to create http server
 }
 
 type router struct {
@@ -17,47 +15,31 @@ type router struct {
 }
 
 type path struct {
-	Method  string
-	Path    string
-	Handler http.Handler
-}
-
-func (router *router) Add(m, p string, h http.Handler) {
-	router.paths = append(router.paths, &path{
-		Method:  m,
-		Path:    p,
-		Handler: h,
-	})
+	//
 }
 
 func (router *router) Get(p string, h http.Handler) {
-	router.Add(http.MethodGet, p, h)
+	// implement
 }
 
 func (router *router) Post(p string, h http.Handler) {
-	router.Add(http.MethodPost, p, h)
+	// implement
 }
 
 func (router *router) Put(p string, h http.Handler) {
-	router.Add(http.MethodPut, p, h)
+	// implement
 }
 
 func (router *router) Patch(p string, h http.Handler) {
-	router.Add(http.MethodPatch, p, h)
+	// implement
 }
 
 func (router *router) Delete(p string, h http.Handler) {
-	router.Add(http.MethodDelete, p, h)
+	// implement
 }
 
 func (router *router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	for _, p := range router.paths {
-		if p.Method == r.Method && p.Path == r.URL.Path {
-			p.Handler.ServeHTTP(w, r)
-			return
-		}
-	}
-	http.NotFound(w, r)
+	// implement router
 }
 
 func index(w http.ResponseWriter, r *http.Request) {

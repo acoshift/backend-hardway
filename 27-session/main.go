@@ -1,9 +1,6 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/base64"
-	"io"
 	"net/http"
 )
 
@@ -17,80 +14,59 @@ func main() {
 var sessionStore = make(map[string]*session)
 
 type session struct {
-	ID     string
-	UserID int
+	//
 }
 
 func findSession(sessionID string) *session {
-	return sessionStore[sessionID]
+	return nil
 }
 
 func storeSession(sessionID string, sess *session) {
-	sessionStore[sessionID] = sess
+	//
 }
 
 func getSessionFromRequest(w http.ResponseWriter, r *http.Request) *session {
-	var sess *session
+	// read session id from cookie
 
-	if c, err := r.Cookie("session"); err == nil {
-		sess = findSession(c.Value)
-	}
+	// find session from database
 
-	if sess == nil {
-		sess = &session{
-			ID: generateSessionID(),
-		}
-		storeSession(sess.ID, sess)
-		http.SetCookie(w, &http.Cookie{
-			Name:     "session",
-			Value:    sess.ID,
-			Path:     "/",
-			HttpOnly: true,
-		})
-	}
-	return sess
+	// if session not found create new session, and set session id to cookie
+
+	return nil
 }
 
 func generateSessionID() string {
-	b := make([]byte, 16)
-	io.ReadFull(rand.Reader, b)
-	return base64.RawURLEncoding.EncodeToString(b)
+	// create new slice
+
+	// read data from rand.Reader from package crypto/rand
+
+	// encode to base64
+
+	return ""
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	var userID int
+	// get session from request
 
-	sess := getSessionFromRequest(w, r)
-	if sess != nil {
-		userID = sess.UserID
-	}
+	// if not sign in, return sign in page
 
-	// not sign in
-	if userID == 0 {
-		w.Write([]byte(`
-			<!doctype html>
-			<a href=/signin>Sign In</a>
-		`))
-		return
-	}
-
-	w.Write([]byte(`
-		<!doctype html>
-		<a href=/signout>Sign Out</a>
-	`))
+	// if already sign in return sign out page
 }
 
 func signIn(w http.ResponseWriter, r *http.Request) {
-	// session fixation
-	sess := getSessionFromRequest(w, r)
-	sess.UserID = 1
+	// TODO: session fixation hack
 
-	http.Redirect(w, r, "/", http.StatusFound)
+	// get session from request
+
+	// set user id to `1`
+
+	// redirect to /
 }
 
 func signOut(w http.ResponseWriter, r *http.Request) {
-	sess := getSessionFromRequest(w, r)
-	sess.UserID = 0
+	// get session from request
 
-	http.Redirect(w, r, "/", http.StatusFound)
+	// set user id to `0`
+
+	// redirect to /
 }

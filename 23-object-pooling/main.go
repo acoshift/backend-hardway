@@ -2,11 +2,9 @@ package main
 
 import (
 	"compress/gzip"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 func main() {
@@ -43,11 +41,7 @@ func large(w http.ResponseWriter, r *http.Request) {
 }
 
 func gzipMiddleware(h http.Handler) http.Handler {
-	pool := &sync.Pool{
-		New: func() interface{} {
-			return gzip.NewWriter(ioutil.Discard)
-		},
-	}
+	// create gzip pool
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
@@ -71,7 +65,7 @@ func gzipMiddleware(h http.Handler) http.Handler {
 
 		gw := &gzipResponseWriter{
 			ResponseWriter: w,
-			pool:           pool,
+			// add pool to gzipResponseWriter
 		}
 		defer gw.Close()
 
@@ -81,7 +75,7 @@ func gzipMiddleware(h http.Handler) http.Handler {
 
 type gzipResponseWriter struct {
 	http.ResponseWriter
-	pool          *sync.Pool
+	// pool
 	gzipWriter    *gzip.Writer
 	contentLength int
 }
@@ -100,8 +94,10 @@ func (w *gzipResponseWriter) init() {
 		return
 	}
 
-	w.gzipWriter = w.pool.Get().(*gzip.Writer)
-	w.gzipWriter.Reset(w.ResponseWriter)
+	// get gzip writer from pool
+
+	// reset gzip writer with wrapped responseWriter
+
 	h.Del("Content-Length")
 	h.Set("Content-Encoding", "gzip")
 }
@@ -123,7 +119,8 @@ func (w *gzipResponseWriter) Close() {
 		return
 	}
 	w.gzipWriter.Close()
-	w.pool.Put(w.gzipWriter)
+
+	// put gzip writer to pool
 }
 
 func (w *gzipResponseWriter) WriteHeader(code int) {

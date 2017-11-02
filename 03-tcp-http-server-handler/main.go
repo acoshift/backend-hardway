@@ -1,71 +1,54 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"io"
-	"log"
-	"net"
 	"net/http"
 )
 
 func main() {
-	lis, err := net.Listen("tcp", "localhost:3333")
-	if err != nil {
-		log.Fatal("tcp listen error:", err)
-	}
-	defer lis.Close()
+	// create tcp listener at :3333
+	// don't forget to close tcp listener when done
 
 	for {
-		conn, err := lis.Accept()
-		if err != nil {
-			log.Fatal("tcp accept error:", err)
-		}
+		// accept connection from listener
 
 		go func() {
-			defer conn.Close()
-			reader := bufio.NewReader(conn)
-			r, err := http.ReadRequest(reader)
-			if err != nil {
-				log.Printf("read request: %v\n", err)
-				return
-			}
-			w := &responseWriter{writer: conn}
-			handler(w, r)
+			// don't forget to close connection when done
+
+			// create bufio.NewReader from connection
+
+			// use http.ReadRequest to parse HTTP request
+
+			// create new responseWriter
+
+			// call handler with responseWriter and request
 		}()
 	}
 }
 
 type responseWriter struct {
-	header      http.Header
-	wroteHeader bool
-	writer      io.Writer
+	//
 }
 
 func (w *responseWriter) Header() http.Header {
-	if w.header == nil {
-		w.header = make(http.Header)
-	}
-	return w.header
+	return nil
 }
 
 func (w *responseWriter) Write(p []byte) (int, error) {
-	if !w.wroteHeader {
-		w.WriteHeader(200)
+	if true { // check is header not written
+		// write header with status code 200 (default)
 	}
-	return w.writer.Write(p)
+	// write p to connection
+	return 0, nil // return wrote bytes and/or error
 }
 
 func (w *responseWriter) WriteHeader(code int) {
-	if w.wroteHeader {
-		return
-	}
-	w.wroteHeader = true
-	fmt.Fprintf(w.writer, "HTTP/1.1 %d %s\n", code, http.StatusText(code))
-	w.header.Write(w.writer)
-	w.writer.Write([]byte("\n"))
+	// DO NOT write header > 1 time
+
+	// write HTTP version and status code
+	// write HTTP headers
+	// write empty line to start HTTP body
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, World."))
+	// write data to responseWriter
 }

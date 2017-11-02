@@ -48,29 +48,19 @@ func main() {
 
 func cors(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		origin := r.Header.Get("Origin")
-
 		// only allow http://localhost:8080
 		if r.Method == http.MethodOptions {
-			if origin != "http://localhost:8080" {
-				http.Error(w, "Forbidden", http.StatusForbidden)
-				return
-			}
+			// send forbidden if origin not allowed
 
-			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST")
-			w.Header().Set("Access-Control-Allow-Headers", "X-Api-Token")
-			w.Header().Set("Access-Control-Max-Age", "5") // 5 seconds
-			w.Header().Add("Vary", "Origin")
-			w.Header().Add("Vary", "Access-Control-Allow-Methods")
-			w.Header().Add("Vary", "Access-Control-Allow-Headers")
-			w.WriteHeader(http.StatusOK)
+			// set preflight headers
+
+			// write header
 			return
 		}
 
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
-		w.Header().Set("Access-Control-Expose-Headers", "X-Request-Id") // comment here
-		w.Header().Add("Vary", "Origin")
+		// set real headers
+
+		// toggle Access-Control-Expose-Headers to see result in browser
 
 		h.ServeHTTP(w, r)
 	})

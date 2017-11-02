@@ -1,21 +1,16 @@
 package main
 
 import (
-	"log"
-	"net"
 	"net/http"
 )
 
 func main() {
-	lis, err := net.Listen("tcp", "localhost:3333")
-	if err != nil {
-		log.Fatal("tcp listen error:", err)
-	}
-	defer lis.Close()
+	// create tcp listener at :3333
+	// close tcp listener when done
 
-	http.Serve(lis, http.HandlerFunc(handler))
+	// use http.Serve to serve connection from listener
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, World."))
+	// write data to responseWriter
 }

@@ -11,18 +11,14 @@ func main() {
 		m2,
 	)(http.HandlerFunc(index))
 
-	http.ListenAndServe("localhost:3333", h)
+	http.ListenAndServe(":3333", h)
 }
 
 type middleware func(http.Handler) http.Handler
 
 func chain(ms ...middleware) middleware {
-	return func(h http.Handler) http.Handler {
-		for i := len(ms); i > 0; i-- {
-			h = ms[i-1](h)
-		}
-		return h
-	}
+	// implement
+	return nil
 }
 
 func m1(h http.Handler) http.Handler {

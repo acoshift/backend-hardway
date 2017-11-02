@@ -5,9 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"strings"
 )
 
 func main() {
@@ -21,9 +19,9 @@ func main() {
 var sessionStore = make(map[string]*session)
 
 type session struct {
-	ID        string
-	UserID    int
-	CSRFToken string
+	ID     string
+	UserID int
+	// add csrf token
 }
 
 func findSession(sessionID string) *session {
@@ -63,9 +61,8 @@ func generateSessionID() string {
 }
 
 func generateCSRFToken() string {
-	b := make([]byte, 32)
-	io.ReadFull(rand.Reader, b)
-	return base64.RawURLEncoding.EncodeToString(b)
+	//
+	return ""
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +73,6 @@ func index(w http.ResponseWriter, r *http.Request) {
 		userID = sess.UserID
 	}
 
-	// not sign in
 	if userID == 0 {
 		w.Write([]byte(`
 			<!doctype html>
@@ -85,22 +81,23 @@ func index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// add csrf token to form
 	fmt.Fprintf(w, `
 		<!doctype html>
 		<form method=POST action=/transfer>
 			<input name=amount placeholder=amount required>
-			<input name=csrf_token value=%s type=hidden>
 			<button type=submit>Transfer</button>
 		</form>
 		<a href=/signout>Sign Out</a>
-	`, sess.CSRFToken)
+	`)
 }
 
 func signIn(w http.ResponseWriter, r *http.Request) {
 	// session fixation
 	sess := getSessionFromRequest(w, r)
 	sess.UserID = 1
-	sess.CSRFToken = generateCSRFToken()
+
+	// generate new csrf token
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }
@@ -113,38 +110,21 @@ func signOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func transfer(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
-	}
+	// allow only POST
 
 	// check origin
-	if s := r.Header.Get("Origin"); s != "" && s != "http://localhost:3333" {
-		http.Error(w, "CSRF Detected!!!, Invalid Origin", http.StatusBadRequest)
-		return
-	}
 
 	// check referer
-	if s := r.Header.Get("Referer"); s != "" && !strings.HasPrefix(s, "http://localhost:3333/") {
-		http.Error(w, "CSRF Detected!!!, Invalid Referer", http.StatusBadRequest)
-		return
-	}
 
-	sess := getSessionFromRequest(w, r)
-	if sess.UserID == 0 {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	// check is user sign in
 
-	amount := r.FormValue("amount")
-	csrfToken := r.FormValue("csrf_token")
+	// get amount from form
 
-	if csrfToken != sess.CSRFToken {
-		http.Error(w, "CSRF Detected!!!, Invalid CSRF Token", http.StatusBadRequest)
-		return
-	}
+	// get csrf token from form
 
-	log.Println("transfer", amount)
+	// check form csrf token with session csrf token
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	// if transfer success print amount to console
+
+	// redirect to /
 }

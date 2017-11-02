@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
 )
 
@@ -13,16 +11,11 @@ func main() {
 func handler(w http.ResponseWriter, r *http.Request) {
 	// Content-Type: application/json
 
-	var v struct {
-		Name  string `json:"name"`
-		Score int    `json:"score"`
-	}
+	// create request body struct
 
-	err := json.NewDecoder(r.Body).Decode(&v)
-	if err != nil {
-		log.Println("decode error:", err)
-		return
-	}
-	log.Println(v)
+	// decode request body using json.NewDecoder
+
+	// print decoded struct to console
+
 	w.Write([]byte("ok\n"))
 }

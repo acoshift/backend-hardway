@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 )
 
 func main() {
@@ -12,21 +11,13 @@ func main() {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	// read incoming cookie
 	i := 0
-	if c, _ := r.Cookie("data"); c != nil {
-		i, _ = strconv.Atoi(c.Value)
-	}
+
+	// read i from cookie named `data`
+
 	i++
 
-	// set new cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:     "data",
-		Value:    strconv.Itoa(i),
-		Path:     "/",
-		HttpOnly: true,
-		MaxAge:   5,
-	})
+	// set i to new cookie named `data`
 
 	fmt.Fprintf(w, "new cookie: %d", i)
 }

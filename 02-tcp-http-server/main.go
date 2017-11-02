@@ -1,45 +1,23 @@
 package main
 
-import (
-	"bufio"
-	"log"
-	"net"
-	"net/http"
-	"time"
-)
-
 func main() {
-	lis, err := net.Listen("tcp", "localhost:3333")
-	if err != nil {
-		log.Fatal("tcp listen error:", err)
-	}
-	defer lis.Close()
+	// create tcp listener at :3333
+	// don't forget to close tcp listener when done
 
 	for {
-		conn, err := lis.Accept()
-		if err != nil {
-			log.Fatal("tcp accept error:", err)
-		}
+		// accept connection from listener
 
 		go func() {
-			defer conn.Close()
-			reader := bufio.NewReader(conn)
+			// don't forget to close connection when done
+
+			// create bufio.NewReader from connection
 			for {
-				s, _, err := reader.ReadLine()
-				if err != nil {
-					log.Printf("connection: %v\n", err)
-					return
-				}
-				log.Printf("receive: %s\n", s)
-				if len(s) == 0 {
-					p := "HTTP/1.1 200 OK\n"
-					p += "Date: " + time.Now().Format(http.TimeFormat) + "\n"
-					p += "Connection: close\n"
-					p += "Content-Type: text/html\n"
-					p += "\n"
-					p += "<h1>Hello from TCP Server</h1><p>:P</p>"
-					conn.Write([]byte(p))
-					conn.Close()
+				// read line from reader
+
+				// print data out to console
+
+				if true { // check is data is empty string
+					// response HTTP to connection
 				}
 			}
 		}()

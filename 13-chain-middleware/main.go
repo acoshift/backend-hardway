@@ -6,9 +6,11 @@ import (
 )
 
 func main() {
-	h := m1(m2(http.HandlerFunc(index)))
+	var h http.Handler
 
-	http.ListenAndServe("localhost:3333", h)
+	// chain middleware m1 => m2 then wrap index handler
+
+	http.ListenAndServe(":3333", h)
 }
 
 func m1(h http.Handler) http.Handler {

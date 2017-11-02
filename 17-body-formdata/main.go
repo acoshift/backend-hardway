@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 )
 
@@ -11,8 +10,10 @@ func main() {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	// Content-Type: multipart/form-data
-	r.ParseMultipartForm(10 << 20) // 10 * 2^20
-	log.Println(r.MultipartForm.Value)
-	log.Println(r.MultipartForm.File)
+
+	// parse multipart form
+
+	// print form values and files to console
+
 	w.Write([]byte("ok\n"))
 }

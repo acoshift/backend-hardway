@@ -1,12 +1,8 @@
 package main
 
 import (
-	"image"
-	"image/jpeg"
 	"io"
 	"net/http"
-
-	"github.com/disintegration/imaging"
 )
 
 func main() {
@@ -19,27 +15,23 @@ type resizeHandler struct {
 }
 
 func (h *resizeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.Write([]byte("Allow only POST"))
-		return
-	}
+	// DO NOT accept other method than POST
 
-	err := h.resizer(w, io.LimitReader(r.Body, 2<<20)) // 2 MiB
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// limit body to 2 MiB
+
+	// call resizer and limit body
+
+	// write result jpeg image to responseWriter
 }
 
 func resizeImage(dst io.Writer, src io.Reader) error {
-	img, _, err := image.Decode(src)
-	if err != nil {
-		return err
-	}
-	result := imaging.Thumbnail(img, 150, 150, imaging.Lanczos)
-	err = jpeg.Encode(dst, result, &jpeg.Options{Quality: 80})
-	if err != nil {
-		return err
-	}
+	// decode image using image.Decode
+
+	// use imaging.Thumbnail to resize image
+
+	// encode result image using jpeg.Encode
+
+	// write result jpeg image to writer
+
 	return nil
 }
