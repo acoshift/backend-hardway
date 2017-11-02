@@ -47,6 +47,7 @@ func gzipMiddleware(h http.Handler) http.Handler {
 			return
 		}
 
+		// if r.Header.Get("Sec-WebSocket-Key") != "" {
 		if len(r.Header.Get("Sec-WebSocket-Key")) > 0 {
 			h.ServeHTTP(w, r)
 			return
@@ -54,6 +55,7 @@ func gzipMiddleware(h http.Handler) http.Handler {
 
 		wh := w.Header()
 
+		// if wh.Get("Content-Encoding") != "" {
 		if len(wh.Get("Content-Encoding")) > 0 {
 			h.ServeHTTP(w, r)
 			return
