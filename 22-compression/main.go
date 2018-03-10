@@ -50,7 +50,7 @@ func gzipMiddleware(h http.Handler) http.Handler {
 
 		// wrap responseWriter with gzipResponseWriter
 
-		// don't foget to close gzip writer when done
+		// don't forget to close gzip writer when done
 
 		// call next handler
 	})
