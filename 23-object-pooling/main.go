@@ -2,6 +2,7 @@ package main
 
 import (
 	"compress/gzip"
+	"mime"
 	"net/http"
 	"strconv"
 	"strings"
@@ -41,7 +42,7 @@ func large(w http.ResponseWriter, r *http.Request) {
 }
 
 func gzipMiddleware(h http.Handler) http.Handler {
-	// create gzip pool
+	// create pool
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
@@ -49,23 +50,23 @@ func gzipMiddleware(h http.Handler) http.Handler {
 			return
 		}
 
-		if len(r.Header.Get("Sec-WebSocket-Key")) > 0 {
+		if r.Header.Get("Sec-WebSocket-Key") != "" {
 			h.ServeHTTP(w, r)
 			return
 		}
 
 		wh := w.Header()
 
-		if len(wh.Get("Content-Encoding")) > 0 {
+		if wh.Get("Content-Encoding") != "" {
 			h.ServeHTTP(w, r)
 			return
 		}
 
-		wh.Set("Vary", "Accept-Encoding")
+		wh.Add("Vary", "Accept-Encoding")
 
 		gw := &gzipResponseWriter{
 			ResponseWriter: w,
-			// add pool to gzipResponseWriter
+			// add pool
 		}
 		defer gw.Close()
 
@@ -75,42 +76,58 @@ func gzipMiddleware(h http.Handler) http.Handler {
 
 type gzipResponseWriter struct {
 	http.ResponseWriter
-	// pool
-	gzipWriter    *gzip.Writer
-	contentLength int
+	gzipWriter  *gzip.Writer
+	wroteHeader bool
+	// add pool
+}
+
+var allowCompressType = map[string]bool{
+	"text/plain":               true,
+	"text/html":                true,
+	"text/css":                 true,
+	"text/xml":                 true,
+	"text/javascript":          true,
+	"application/x-javascript": true,
+	"application/xml":          true,
 }
 
 func (w *gzipResponseWriter) init() {
 	h := w.Header()
 
-	if len(h.Get("Content-Encoding")) > 0 {
+	if h.Get("Content-Encoding") != "" {
 		return
 	}
 
-	if w.contentLength == 0 {
-		w.contentLength, _ = strconv.Atoi(h.Get("Content-Length"))
+	if sl := h.Get("Content-Length"); sl != "" {
+		l, _ := strconv.Atoi(sl)
+		if l > 0 && l < 860 {
+			return
+		}
 	}
-	if w.contentLength > 0 && w.contentLength <= 860 {
+
+	// skip if no match type
+	ct, _, err := mime.ParseMediaType(h.Get("Content-Type"))
+	if err != nil {
+		ct = "application/octet-stream"
+	}
+
+	if !allowCompressType[ct] {
 		return
 	}
 
 	// get gzip writer from pool
-
-	// reset gzip writer with wrapped responseWriter
-
+	// reset gzip writer
 	h.Del("Content-Length")
 	h.Set("Content-Encoding", "gzip")
 }
 
 func (w *gzipResponseWriter) Write(p []byte) (int, error) {
-	if w.gzipWriter == nil {
-		w.init()
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
 	}
-
 	if w.gzipWriter != nil {
 		return w.gzipWriter.Write(p)
 	}
-
 	return w.ResponseWriter.Write(p)
 }
 
@@ -120,12 +137,14 @@ func (w *gzipResponseWriter) Close() {
 	}
 	w.gzipWriter.Close()
 
-	// put gzip writer to pool
+	// put gzip writer back to pool
 }
 
 func (w *gzipResponseWriter) WriteHeader(code int) {
-	if w.gzipWriter == nil {
-		w.init()
+	if w.wroteHeader {
+		return
 	}
+	w.wroteHeader = true
+	w.init()
 	w.ResponseWriter.WriteHeader(code)
 }

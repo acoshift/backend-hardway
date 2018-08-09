@@ -46,7 +46,7 @@ func gzipMiddleware(h http.Handler) http.Handler {
 
 		// check is response already encoded
 
-		// set header `Vary: Accept-Encoding` to response
+		// add header `Vary: Accept-Encoding` to response
 
 		// wrap responseWriter with gzipResponseWriter
 
@@ -60,12 +60,24 @@ type gzipResponseWriter struct {
 	//
 }
 
+var allowCompressType = map[string]bool{
+	"text/plain":               true,
+	"text/html":                true,
+	"text/css":                 true,
+	"text/xml":                 true,
+	"text/javascript":          true,
+	"application/x-javascript": true,
+	"application/xml":          true,
+}
+
 func (w *gzipResponseWriter) init() {
 	// check is response already encoded
 
 	// if content length not init, retrive from response's header `Content-Length`
 
 	// skip if content length less than 860 bytes
+
+	// skip if no match type
 
 	// create new gzip writer
 
@@ -75,19 +87,20 @@ func (w *gzipResponseWriter) init() {
 }
 
 func (w *gzipResponseWriter) Write(p []byte) (int, error) {
-	// init writer if not inited
+	// write header if not written
 
-	// if writer inited write to gzip writer
+	// if gzip writer inited write to gzip writer
 
-	// if not bypass gzip writer
+	// if not bypass gzip writer to original response writer
 	return 0, nil
 }
 
 func (w *gzipResponseWriter) Close() {
-	// close gzip writer
+	// close gzip writer if inited
 }
 
 func (w *gzipResponseWriter) WriteHeader(code int) {
-	// init gzip writer if not inited
+	// do not write header twice
+	// init gzip writer
 	// write header
 }
